@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OS — Valentin Breckwoldt</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Outfit:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════ TOKENS ════════ */
+:root{
+  /* Marine palette */
+  --m9:#08111e;--m8:#0f1d30;--m7:#162843;--m6:#1c3457;--m5:#22406c;
+  --m4:#2d5490;--m3:#4a78b8;--m2:#88aad8;--m1:#c4d8f0;--m0:#edf3fb;
+  /* Beige palette */
+  --b9:#252018;--b8:#36302a;--b7:#524c44;--b6:#706a60;--b5:#908a80;
+  --b4:#b0aa9e;--b3:#cec8be;--b2:#e2ddd5;--b1:#edeae4;--b0:#f8f6f1;
+  --w:#ffffff;
+  /* Semantic */
+  --bg:var(--b0);--surf:var(--w);--surf2:var(--b1);
+  --bd:var(--b2);--bd2:var(--b3);
+  --tx:var(--b9);--tx2:var(--b7);--tx3:var(--b5);--tx4:var(--b4);
+  --acc:var(--m6);--acc2:var(--m5);--acc-lt:var(--m0);--acc-bd:var(--m1);
+  --gold:#a07820;--gold-lt:#fdf8ee;--gold-bd:#e0cc88;
+  --grn:#2e6640;--grn-lt:#edf6f0;--grn-bd:#96cca8;
+  --rst:#8c3820;--rst-lt:#faf0ec;--rst-bd:#d8a898;
+  /* Layout */
+  --sb:210px;--r:6px;--r2:10px;--r3:16px;
+  --sh:0 1px 2px rgba(0,0,0,.05),0 2px 6px rgba(0,0,0,.04);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Outfit',sans-serif;background:var(--bg);
+  color:var(--tx);font-size:13px;line-height:1.65;
+  display:flex;min-height:100vh;overflow-x:hidden;
+}
+::selection{background:var(--acc-lt);color:var(--acc)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:3px}
+
+/* ════════ SIDEBAR ════════ */
+.sb{
+  position:fixed;top:0;left:0;
+  width:var(--sb);height:100vh;
+  background:var(--m9);
+  display:flex;flex-direction:column;
+  z-index:100;overflow-y:auto;scrollbar-width:none;
+}
+.sb-top{
+  padding:22px 16px 16px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.sb-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;color:#fff;line-height:1.25;font-weight:600;
+  margin-bottom:10px;
+}
+.sb-name em{color:var(--m2);font-style:italic}
+.sb-chip{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:var(--r);padding:5px 9px;
+}
+.sb-chip-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--m2);animation:pulse 2.5s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.sb-chip-date{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;color:var(--m1);letter-spacing:.04em;flex:1;
+}
+.sb-streak{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:rgba(255,255,255,.3);margin-left:auto;
+}
+
+.sb-nav{padding:12px 8px}
+.sb-grp{margin-bottom:2px}
+.sb-grp-lbl{
+  font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:rgba(255,255,255,.2);padding:8px 8px 3px;
+}
+.n{
+  display:flex;align-items:center;gap:7px;
+  padding:6px 9px;border-radius:var(--r);
+  cursor:pointer;font-size:11.5px;color:rgba(255,255,255,.45);
+  transition:all .12s;border:1px solid transparent;user-select:none;
+}
+.n:hover{background:rgba(255,255,255,.05);color:rgba(255,255,255,.8)}
+.n.on{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.1);color:#fff}
+.n-ic{font-size:11px;width:14px;text-align:center;flex-shrink:0}
+.n-flag{
+  margin-left:auto;font-size:8px;font-family:'JetBrains Mono',monospace;
+  background:rgba(140,56,32,.35);color:#e8a888;
+  padding:1px 5px;border-radius:3px;
+}
+
+.sb-foot{
+  margin-top:auto;padding:12px 16px;
+  border-top:1px solid rgba(255,255,255,.07);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;color:rgba(255,255,255,.18);line-height:1.9;
+}
+.sb-foot b{color:rgba(255,255,255,.3);font-weight:400}
+.sb-save{
+  font-size:8px;color:rgba(255,255,255,.2);
+  margin-top:6px;display:flex;align-items:center;gap:4px;
+}
+.sb-save-dot{width:4px;height:4px;border-radius:50%;background:var(--grn)}
+
+/* ════════ MAIN ════════ */
+.main{margin-left:var(--sb);flex:1}
+.page{display:none;padding:40px 48px 80px;max-width:960px;animation:fi .2s ease}
+.page.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ════════ PAGE HEADER ════════ */
+.p-ey{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--acc2);margin-bottom:5px;font-family:'JetBrains Mono',monospace}
+.p-h{font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--b9);margin-bottom:6px;font-weight:600;line-height:1.15}
+.p-h em{color:var(--acc);font-style:italic}
+.p-d{font-size:12.5px;color:var(--tx3);max-width:520px;line-height:1.7;margin-bottom:24px}
+.p-hr{border:none;border-top:1px solid var(--bd);margin-bottom:24px}
+
+/* ════════ GRIDS ════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+
+/* ════════ CARDS ════════ */
+.c{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:16px 18px;box-shadow:var(--sh)}
+.c-sm{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:11px 14px;box-shadow:var(--sh)}
+.c.m{border-top:2px solid var(--acc)}
+.c.g{border-top:2px solid var(--gold)}
+.c.gr{border-top:2px solid var(--grn)}
+.c.r{border-top:2px solid var(--rst)}
+.ct{font-size:11.5px;font-weight:500;color:var(--b8);margin-bottom:5px}
+.cd{font-size:12px;color:var(--tx3);line-height:1.6}
+
+/* ════════ SEC ════════ */
+.sec{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--b9);margin-bottom:4px;font-weight:600}
+.sec em{color:var(--acc);font-style:italic}
+.sec-s{font-size:12px;color:var(--tx3);margin-bottom:14px;line-height:1.55}
+.sec-br{margin:24px 0 20px;border:none;border-top:1px solid var(--bd)}
+
+/* ════════ INPUTS ════════ */
+.il{font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4);margin-bottom:4px;display:block;font-family:'JetBrains Mono',monospace}
+.if{
+  width:100%;background:var(--surf2);border:1px solid var(--bd);
+  border-radius:var(--r);padding:8px 11px;
+  font-family:'Outfit',sans-serif;font-size:12.5px;color:var(--tx);
+  resize:vertical;transition:border-color .13s;min-height:36px;
+}
+.if:focus{outline:none;border-color:var(--acc)}
+select.if{cursor:pointer}
+.ig{margin-bottom:10px}
+.ii{border:none;background:transparent;font-family:'Outfit',sans-serif;font-size:inherit;color:inherit;outline:none;width:100%}
+.ii::placeholder{color:var(--tx4)}
+
+/* ════════ CHECKLIST ════════ */
+.cl{list-style:none}
+.cl li{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid var(--bd);font-size:12.5px;color:var(--tx2)}
+.cl li:last-child{border-bottom:none}
+.ck{width:14px;height:14px;border:1.5px solid var(--bd2);border-radius:4px;flex-shrink:0;margin-top:2px;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.ck:hover{border-color:var(--acc)}
+.ck.on{background:var(--acc);border-color:var(--acc)}
+.cl-l{flex:1;line-height:1.5}
+.cl-m{font-size:10px;color:var(--tx4);margin-top:1px;font-family:'JetBrains Mono',monospace}
+
+/* ════════ RATINGS ════════ */
+.er{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px}
+.er:last-child{border-bottom:none}
+.el{flex:1;color:var(--tx2)}
+.ebs{display:flex;gap:2px}
+.eb{width:24px;height:24px;border-radius:var(--r);border:1.5px solid var(--bd2);background:var(--surf2);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .11s;color:var(--tx4);font-family:'JetBrains Mono',monospace}
+.eb:hover{border-color:var(--acc);color:var(--acc)}
+.eb.on{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* ════════ TAGS ════════ */
+.tag{display:inline-flex;align-items:center;font-size:9.5px;font-weight:500;padding:2px 7px;border-radius:20px}
+.t-m{background:var(--acc-lt);color:var(--acc);border:1px solid var(--acc-bd)}
+.t-g{background:var(--gold-lt);color:var(--gold);border:1px solid var(--gold-bd)}
+.t-gr{background:var(--grn-lt);color:var(--grn);border:1px solid var(--grn-bd)}
+.t-r{background:var(--rst-lt);color:var(--rst);border:1px solid var(--rst-bd)}
+.t-d{background:var(--surf2);color:var(--tx3);border:1px solid var(--bd)}
+
+/* ════════ LINKED BADGE ════════ */
+.lb{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:8.5px;color:var(--acc);font-family:'JetBrains Mono',monospace;
+  background:var(--acc-lt);border:1px solid var(--acc-bd);
+  border-radius:3px;padding:1px 5px;margin-left:5px;vertical-align:middle;
+}
+
+/* ════════ PROGRESS BAR ════════ */
+.pb{background:var(--surf2);border-radius:3px;height:3px;overflow:hidden;margin-top:5px}
+.pf{height:100%;border-radius:3px;background:var(--acc);transition:width .4s}
+
+/* ════════ TOAST ════════ */
+.toast{
+  position:fixed;bottom:22px;right:22px;
+  background:var(--m8);color:var(--m1);
+  border:1px solid var(--m6);border-radius:var(--r2);
+  padding:10px 16px;font-size:11px;
+  z-index:999;transform:translateY(60px);opacity:0;
+  transition:all .28s cubic-bezier(.22,.68,0,1.2);pointer-events:none;
+  font-family:'JetBrains Mono',monospace;box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+.toast.on{transform:translateY(0);opacity:1}
+
+/* ════════ MODAL ════════ */
+.mbg{position:fixed;inset:0;background:rgba(8,17,30,.5);backdrop-filter:blur(5px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.mbg.on{display:flex}
+.modal{background:var(--surf);border:1px solid var(--bd2);border-radius:var(--r3);padding:24px;max-width:560px;width:100%;max-height:84vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.12);animation:fi .18s ease}
+.mc{float:right;background:none;border:none;color:var(--tx4);font-size:20px;cursor:pointer;padding:0;line-height:1;transition:color .12s;margin-top:-2px}
+.mc:hover{color:var(--tx)}
+.mt{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--b9);margin-bottom:4px;font-weight:600}
+.ms{font-size:11.5px;color:var(--tx3);margin-bottom:18px}
+
+/* ════════ BUTTONS ════════ */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:var(--r2);border:none;font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s}
+.btn-p{background:var(--acc);color:#fff}
+.btn-p:hover{background:var(--acc2)}
+.btn-s{background:var(--surf2);color:var(--tx2);border:1.5px solid var(--bd2)}
+.btn-s:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ════════ TABLE ════════ */
+.tw{overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4);padding:7px 11px;border-bottom:1px solid var(--bd2);background:var(--surf2);font-family:'JetBrains Mono',monospace}
+tbody td{padding:8px 11px;border-bottom:1px solid var(--bd);color:var(--tx2);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surf2)}
+
+/* ════════ WINS ════════ */
+.wi{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.wi:last-child{border-bottom:none}
+.wn{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--acc);line-height:1;flex-shrink:0;font-weight:600;width:18px}
+
+/* ════════ HABIT ════════ */
+.hr-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)}
+.hr-row:last-child{border-bottom:none}
+.hr-name{flex:1;font-size:12px;color:var(--tx2)}
+.hr-days{display:flex;gap:2px}
+.hd{width:26px;height:26px;border-radius:var(--r);border:1.5px solid var(--bd2);background:var(--surf2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--tx4);font-family:'JetBrains Mono',monospace;transition:all .11s}
+.hd:hover{border-color:var(--acc);color:var(--acc)}
+.hd.on{background:var(--grn-lt);border-color:var(--grn-bd);color:var(--grn)}
+
+/* ════════ ARCHIVE ════════ */
+.tl{padding-left:18px;position:relative}
+.tl::before{content:'';position:absolute;left:5px;top:8px;bottom:8px;width:1px;background:var(--bd2)}
+.tl-it{position:relative;margin-bottom:12px}
+.tl-dot{position:absolute;left:-14px;top:5px;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--acc-bd);background:var(--acc-lt)}
+.tl-date{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--acc);margin-bottom:4px}
+.tl-card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:border-color .12s;box-shadow:var(--sh)}
+.tl-card:hover{border-color:var(--acc-bd)}
+
+/* ════════ STEP ════════ */
+.step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--bd)}
+.step:last-child{border-bottom:none}
+.sn{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--acc);background:var(--acc-lt);border:1px solid var(--acc-bd);border-radius:var(--r);padding:2px 6px;flex-shrink:0;margin-top:1px}
+.st{font-size:12.5px;font-weight:500;color:var(--tx);margin-bottom:2px}
+.sd{font-size:11.5px;color:var(--tx3);line-height:1.5}
+
+/* ══════════════════════════════════════════
+   ★ HERO MANIFESTO (Dashboard top)
+══════════════════════════════════════════ */
+.hero{
+  background:var(--m9);border-radius:var(--r3);
+  padding:28px 32px;margin-bottom:20px;
+  position:relative;overflow:hidden;
+}
+/* subtle texture */
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 0% 100%, rgba(44,84,144,.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 0%, rgba(22,40,67,.6) 0%, transparent 55%);
+  pointer-events:none;
+}
+.hero-inner{position:relative;z-index:1}
+.hero-top{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;margin-bottom:18px;
+  flex-wrap:wrap;gap:10px;
+}
+.hero-greeting{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;color:#fff;font-weight:600;line-height:1.2;
+}
+.hero-greeting em{color:var(--m2);font-style:italic}
+.hero-date{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;color:var(--m2);letter-spacing:.04em;
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r);padding:5px 10px;
+}
+.hero-dot{width:5px;height:5px;border-radius:50%;background:var(--m2);animation:pulse 2.5s infinite}
+/* pillars */
+.hero-pillars{
+  display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;
+}
+.pill{
+  display:flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;padding:4px 11px;
+  font-size:11px;color:rgba(255,255,255,.75);
+  letter-spacing:.01em;
+}
+.pill-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0}
+/* verse */
+.hero-verse{
+  border-top:1px solid rgba(255,255,255,.08);
+  padding-top:14px;display:flex;align-items:center;gap:10px;
+}
+.hero-verse-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:14px;color:rgba(255,255,255,.55);
+  font-style:italic;line-height:1.45;flex:1;
+}
+.hero-verse-ref{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;color:var(--m2);
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r);padding:3px 7px;flex-shrink:0;
+  white-space:nowrap;
+}
+
+/* ════════ DASHBOARD PANELS ════════ */
+.dash-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.dash-row.three{grid-template-columns:1fr 1fr 1fr}
+/* MIT box inside dashboard */
+.mit-wrap{
+  background:var(--m8);border-radius:var(--r2);
+  padding:14px 16px;margin-bottom:12px;
+  border:1px solid var(--m7);
+  position:relative;overflow:hidden;
+}
+.mit-wrap::after{
+  content:'MIT';position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  font-family:'Cormorant Garamond',serif;font-size:52px;
+  color:rgba(255,255,255,.03);line-height:1;pointer-events:none;font-weight:600;
+}
+.mit-lbl{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--m2);margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.mit-wrap .if{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);color:#fff}
+.mit-wrap .if:focus{border-color:var(--m2)}
+.mit-wrap .if::placeholder{color:rgba(255,255,255,.25)}
+
+/* linked panel */
+.lp{
+  background:var(--surf);border:1px solid var(--bd);
+  border-radius:var(--r2);padding:13px 15px;box-shadow:var(--sh);
+  cursor:pointer;transition:border-color .12s;
+}
+.lp:hover{border-color:var(--acc-bd)}
+.lp-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lp-title{font-size:9.5px;font-weight:500;color:var(--acc);text-transform:uppercase;letter-spacing:.07em;font-family:'JetBrains Mono',monospace}
+.lp-arr{font-size:11px;color:var(--tx4)}
+.lp-body{font-size:12px;color:var(--tx2);line-height:1.55}
+.lp-empty{font-size:11.5px;color:var(--tx4);font-style:italic}
+
+/* kpi mini */
+.kpi{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:13px 15px;position:relative;overflow:hidden;box-shadow:var(--sh)}
+.kpi::after{content:'';position:absolute;top:0;left:0;width:100%;height:2px}
+.kpi.m::after{background:var(--acc)}.kpi.g::after{background:var(--gold)}.kpi.gr::after{background:var(--grn)}.kpi.r::after{background:var(--rst)}
+.kl{font-size:9px;color:var(--tx4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+.kv{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--b9);line-height:1;margin-bottom:2px;font-weight:600}
+.ks{font-size:10px;color:var(--tx4);font-family:'JetBrains Mono',monospace}
+
+/* check-in row */
+.ci-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ci-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:20px;
+  border:1.5px solid var(--bd2);background:var(--surf);
+  cursor:pointer;font-size:11.5px;color:var(--tx3);
+  transition:all .12s;font-family:'Outfit',sans-serif;
+}
+.ci-btn:hover{border-color:var(--acc);color:var(--acc)}
+.ci-btn.on{background:var(--acc-lt);border-color:var(--acc-bd);color:var(--acc)}
+
+/* goal mini card */
+.gm{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)}
+.gm:last-child{border-bottom:none}
+.gm-num{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--b3);line-height:1;flex-shrink:0;font-weight:600;width:16px}
+.gm-title{flex:1;font-size:12px;color:var(--tx2)}
+.gm-pct{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--acc)}
+.gm-bar{width:50px;background:var(--surf2);border-radius:2px;height:3px;overflow:hidden;flex-shrink:0}
+.gm-fill{height:100%;border-radius:2px;background:var(--acc)}
+
+/* vision mini */
+.vm{
+  background:var(--surf);border-left:2px solid var(--gold);
+  border-radius:0 var(--r2) var(--r2) 0;
+  padding:11px 14px;font-size:12px;color:var(--tx2);
+  line-height:1.6;font-style:italic;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav class="sb">
+  <div class="sb-top">
+    <div class="sb-name">Valentin<br><em>Breckwoldt</em></div>
+    <div class="sb-chip">
+      <span class="sb-chip-dot"></span>
+      <span class="sb-chip-date" id="sb-date">—</span>
+      <span class="sb-streak" id="sb-streak">0🔥</span>
+    </div>
+  </div>
+
+  <div class="sb-nav">
+    <div class="sb-grp">
+      <div class="sb-grp-lbl">Täglich</div>
+      <div class="n on" onclick="go('dashboard',this)"><span class="n-ic">◈</span>Dashboard</div>
+      <div class="n" onclick="go('habits',this)"><span class="n-ic">◎</span>Habits</div>
+      <div class="n" onclick="go('wins',this)"><span class="n-ic">✦</span>Wins & Lernen</div>
+    </div>
+    <div class="sb-grp">
+      <div class="sb-grp-lbl">Wöchentlich</div>
+      <div class="n" onclick="go('weekly',this)"><span class="n-ic">◫</span>Weekly Review <span class="n-flag">Pflicht</span></div>
+      <div class="n" onclick="go('priorities',this)"><span class="n-ic">◑</span>Prioritäten</div>
+      <div class="n" onclick="go('energie',this)"><span class="n-ic">◷</span>Energie</div>
+    </div>
+    <div class="sb-grp">
+      <div class="sb-grp-lbl">Ziele & Vision</div>
+      <div class="n" onclick="go('goals',this)"><span class="n-ic">◰</span>Quartalsziele</div>
+      <div class="n" onclick="go('vision',this)"><span class="n-ic">◱</span>Nordsterner</div>
+      <div class="n" onclick="go('decisions',this)"><span class="n-ic">◎</span>Entscheidungen</div>
+    </div>
+    <div class="sb-grp">
+      <div class="sb-grp-lbl">Archiv</div>
+      <div class="n" onclick="go('arch-days',this)"><span class="n-ic">◑</span>Tage</div>
+      <div class="n" onclick="go('arch-weeks',this)"><span class="n-ic">◷</span>Wochen</div>
+    </div>
+  </div>
+
+  <div id="sb-user-area" style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07);display:none"><div style="display:flex;align-items:center;gap:8px"><div id="sb-avatar" style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--m1);flex-shrink:0">V</div><div style="flex:1;overflow:hidden"><div id="sb-user-name" style="font-size:11px;color:#fff;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div><div id="sb-user-email" style="font-size:9px;color:rgba(255,255,255,.35);font-family:JetBrains Mono,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">—</div></div><button onclick="authSignOut()" style="background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.4);font-size:9px;font-family:Outfit,sans-serif;padding:3px 7px;border-radius:4px;cursor:pointer;flex-shrink:0">Out</button></div></div>
+<div class="sb-foot">
+    <b>Typ</b> Organisator · Pos. 56<br>
+    <b>Kognitiv</b> 71 · <b>Individuell</b> 66<br>
+    <b>Archiv</b> automatisch täglich
+    <div class="sb-save"><span class="sb-save-dot" id="sync-dot"></span><span id="save-lbl">—</span></div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+
+<!-- ▸ DASHBOARD ◂ -->
+<div id="page-dashboard" class="page on">
+
+  <!-- HERO MANIFESTO -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div class="hero-top">
+        <div class="hero-greeting">Guten Morgen,<br><em>Valentin.</em></div>
+        <div class="hero-date">
+          <span class="hero-dot"></span>
+          <span id="hero-date">—</span>
+        </div>
+      </div>
+
+      <div class="hero-pillars">
+        <div class="pill"><span class="pill-dot" style="background:#7aaad8"></span>Ownership</div>
+        <div class="pill"><span class="pill-dot" style="background:#c4d8f0"></span>Dream Big</div>
+        <div class="pill"><span class="pill-dot" style="background:#88aad8"></span>Work Hard</div>
+        <div class="pill"><span class="pill-dot" style="background:#7aaad8"></span>Take Risks</div>
+        <div class="pill"><span class="pill-dot" style="background:#c4d8f0"></span>Create the things I wish existed</div>
+        <div class="pill"><span class="pill-dot" style="background:#88aad8"></span>Become the person I promised myself to be</div>
+      </div>
+
+      <div class="hero-verse">
+        <div class="hero-verse-text">
+          "I can do all things through Christ who gives me strength."
+        </div>
+        <div class="hero-verse-ref">Phil 4:13</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIT -->
+  <div class="mit-wrap">
+    <div class="mit-lbl">Most Important Task — heute</div>
+    <textarea class="if" id="mit" rows="2"
+      placeholder="Was ist die eine Aufgabe, die heute wirklich zählt?"></textarea>
+  </div>
+
+  <!-- Row 1: Tasks + Goals -->
+  <div class="dash-row">
+    <!-- Top 3 Aufgaben -->
+    <div class="c">
+      <div class="ct">Top 3 Aufgaben</div>
+      <ul class="cl">
+        <li>
+          <div class="ck" onclick="tCk(this)"></div>
+          <div class="cl-l">
+            <input class="ii" id="t1" placeholder="Aufgabe 1">
+            <div class="cl-m"><input class="ii" id="t1a" style="font-size:10px;color:var(--tx4)" placeholder="Bereich"></div>
+          </div>
+        </li>
+        <li>
+          <div class="ck" onclick="tCk(this)"></div>
+          <div class="cl-l"><input class="ii" id="t2" placeholder="Aufgabe 2"></div>
+        </li>
+        <li>
+          <div class="ck" onclick="tCk(this)"></div>
+          <div class="cl-l"><input class="ii" id="t3" placeholder="Aufgabe 3"></div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Quartalsziele live -->
+    <div class="lp" onclick="go('goals',null)">
+      <div class="lp-hd">
+        <span class="lp-title">◰ Quartalsziele Q2 <span class="lb">↗ live</span></span>
+        <span class="lp-arr">→</span>
+      </div>
+      <div id="dash-goals"><div class="lp-empty">Ziele setzen →</div></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Wochenprioritäten + Vision + Energie -->
+  <div class="dash-row three">
+    <!-- Wochenprioritäten live -->
+    <div class="lp" onclick="go('priorities',null)">
+      <div class="lp-hd">
+        <span class="lp-title">◑ Woche <span class="lb">↗ live</span></span>
+        <span class="lp-arr">→</span>
+      </div>
+      <div id="dash-prio"><div class="lp-empty">Prioritäten setzen →</div></div>
+    </div>
+
+    <!-- Vision -->
+    <div class="lp" onclick="go('vision',null)">
+      <div class="lp-hd">
+        <span class="lp-title">◱ Nordsterner</span>
+        <span class="lp-arr">→</span>
+      </div>
+      <div id="dash-vision"><div class="lp-empty">Vision eintragen →</div></div>
+    </div>
+
+    <!-- Energie heute -->
+    <div class="c">
+      <div class="ct">Energie heute</div>
+      <div class="er">
+        <div class="el">Energie</div>
+        <div class="ebs" id="e-en">
+          <div class="eb" onclick="sR('e-en',0,this)">1</div>
+          <div class="eb" onclick="sR('e-en',1,this)">2</div>
+          <div class="eb" onclick="sR('e-en',2,this)">3</div>
+          <div class="eb" onclick="sR('e-en',3,this)">4</div>
+          <div class="eb" onclick="sR('e-en',4,this)">5</div>
+        </div>
+      </div>
+      <div class="er">
+        <div class="el">Fokus</div>
+        <div class="ebs" id="e-fo">
+          <div class="eb" onclick="sR('e-fo',0,this)">1</div>
+          <div class="eb" onclick="sR('e-fo',1,this)">2</div>
+          <div class="eb" onclick="sR('e-fo',2,this)">3</div>
+          <div class="eb" onclick="sR('e-fo',3,this)">4</div>
+          <div class="eb" onclick="sR('e-fo',4,this)">5</div>
+        </div>
+      </div>
+      <div class="er" style="border:none">
+        <div class="el">Mood</div>
+        <div class="ebs" id="e-mo">
+          <div class="eb" onclick="sR('e-mo',0,this)">😔</div>
+          <div class="eb" onclick="sR('e-mo',1,this)">😐</div>
+          <div class="eb" onclick="sR('e-mo',2,this)">🙂</div>
+          <div class="eb" onclick="sR('e-mo',3,this)">😊</div>
+          <div class="eb" onclick="sR('e-mo',4,this)">🔥</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abend-Check -->
+  <div class="c">
+    <div class="ct">Abend-Check</div>
+    <ul class="cl">
+      <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">MIT erledigt</div></li>
+      <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">3 Wins notiert</div></li>
+      <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Lernpunkt notiert</div></li>
+      <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Morgen vorbereitet (MIT gesetzt)</div></li>
+      <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Hard Stop ≤ 19:00 ✗</div></li>
+    </ul>
+  </div>
+</div><!-- end dashboard -->
+
+<!-- ▸ HABITS ◂ -->
+<div id="page-habits" class="page">
+  <div class="p-ey">Routinen</div>
+  <div class="p-h">Habits & <em>Routinen</em></div>
+  <div class="p-d">Deine tägliche Grundlage. Hard Stop abends ist das noch fehlende Element.</div>
+  <hr class="p-hr">
+  <div style="background:var(--gold-lt);border:1px solid var(--gold-bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--b7);margin-bottom:18px">
+    Starke Basis aktiv: Screen-freie Morgenroutine · Meditation · Bewegung · Bewusstes Essen. Neue Habits erst einführen wenn diese stabil ≥ 21 Tage halten.
+  </div>
+  <div class="c" style="margin-bottom:10px">
+    <div class="ct" style="color:var(--acc);margin-bottom:10px">🌅 Morgen (6–10h)</div>
+    <div id="hab-m"></div>
+  </div>
+  <div class="c" style="margin-bottom:10px">
+    <div class="ct" style="color:var(--rst);margin-bottom:10px">☀️ Mittag (10–16h)</div>
+    <div id="hab-mi"></div>
+  </div>
+  <div class="c" style="margin-bottom:10px">
+    <div class="ct" style="color:var(--acc2);margin-bottom:10px">🌙 Abend (16–19h)</div>
+    <div id="hab-e"></div>
+  </div>
+  <div class="c">
+    <div class="ct" style="margin-bottom:5px">Woche in Zahlen</div>
+    <div id="hab-stats" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--tx3)">—</div>
+  </div>
+</div>
+
+<!-- ▸ WINS ◂ -->
+<div id="page-wins" class="page">
+  <div class="p-ey">Tagesabschluss</div>
+  <div class="p-h">Wins & <em>Lernen</em></div>
+  <div class="p-d">Fortschritte anerkennen — dein Organisator-Typ übersieht sie gerne.</div>
+  <hr class="p-hr">
+  <div class="c m" style="margin-bottom:12px">
+    <div class="ct" style="color:var(--acc);margin-bottom:10px">3 Wins heute</div>
+    <div class="wi"><div class="wn">1</div><textarea class="if" id="w1" rows="2" placeholder="Was ist gut gelaufen?"></textarea></div>
+    <div class="wi"><div class="wn">2</div><textarea class="if" id="w2" rows="2" placeholder="Welchen Fortschritt hast du gemacht?"></textarea></div>
+    <div class="wi"><div class="wn">3</div><textarea class="if" id="w3" rows="2" placeholder="Worauf bist du heute stolz?"></textarea></div>
+  </div>
+  <div class="c" style="margin-bottom:12px">
+    <div class="ig"><label class="il">1 Lernpunkt</label><textarea class="if" id="learn" rows="2" placeholder="Was würdest du heute anders machen?"></textarea></div>
+    <div class="ig" style="margin-bottom:0"><label class="il">Dankbarkeit</label><textarea class="if" id="grat" rows="2" placeholder="Für wen oder was bist du heute dankbar?"></textarea></div>
+  </div>
+  <div class="c">
+    <div class="ct" style="margin-bottom:8px">Morgen vorbereiten</div>
+    <div class="ig"><label class="il">MIT für morgen <span class="lb">↗ auto</span></label><input class="if" id="tmit" style="min-height:32px" placeholder="Was ist das MIT für morgen?"></div>
+    <div class="ig" style="margin-bottom:0"><label class="il">Erste Aufgabe morgen</label><input class="if" id="ttask" style="min-height:32px" placeholder="..."></div>
+  </div>
+</div>
+
+<!-- ▸ WEEKLY REVIEW ◂ -->
+<div id="page-weekly" class="page">
+  <div class="p-ey">Wöchentlich</div>
+  <div class="p-h">Weekly <em>Review</em></div>
+  <div class="p-d">Jeden Sonntag/Montag, 60 Minuten. Nicht optional — verhindert Priority-Drift.</div>
+  <hr class="p-hr">
+  <div style="background:var(--gold-lt);border:1px solid var(--gold-bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--b7);margin-bottom:18px">
+    ⚡ Du neigst zu täglichem Prioritätswechsel. Dieser Review ist der einzige Mechanismus dagegen. Ehrlich ausfüllen.
+  </div>
+  <div class="g2">
+    <div>
+      <div class="sec" style="font-size:16px;margin-bottom:12px">Rückblick</div>
+      <div class="c" style="margin-bottom:10px">
+        <div class="ig"><label class="il">Was habe ich erreicht?</label><textarea class="if" id="wr-ach" rows="4" placeholder="Konkrete Ergebnisse..."></textarea></div>
+        <div class="ig"><label class="il">Was hat Energie gekostet?</label><textarea class="if" id="wr-co" rows="3" placeholder="Situationen, Tasks, Menschen..."></textarea></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Was hat Energie gegeben?</label><textarea class="if" id="wr-ga" rows="3" placeholder="Flow-Momente..."></textarea></div>
+      </div>
+      <div class="c" style="margin-bottom:10px">
+        <div class="ct" style="margin-bottom:8px">Quartalsziele <span class="lb">↗ live</span></div>
+        <div id="wr-goals-ref" style="margin-bottom:10px;font-size:12px;color:var(--tx3);font-style:italic">Ziele laden...</div>
+        <div class="ig"><label class="il">Ziel 1</label><select class="if" id="wr-g1" style="min-height:32px"><option value="">—</option><option value="on">Auf Kurs ✓</option><option value="slight">Leicht hinter Plan</option><option value="behind">Hinter Plan</option><option value="change">Anpassen</option></select></div>
+        <div class="ig"><label class="il">Ziel 2</label><select class="if" id="wr-g2" style="min-height:32px"><option value="">—</option><option value="on">Auf Kurs ✓</option><option value="slight">Leicht hinter Plan</option><option value="behind">Hinter Plan</option><option value="change">Anpassen</option></select></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Ziel 3</label><select class="if" id="wr-g3" style="min-height:32px"><option value="">—</option><option value="on">Auf Kurs ✓</option><option value="slight">Leicht hinter Plan</option><option value="behind">Hinter Plan</option><option value="change">Anpassen</option></select></div>
+      </div>
+      <div class="c">
+        <div class="ct" style="margin-bottom:8px">Energie-Noten</div>
+        <div class="er"><div class="el">Körperlich</div><div class="ebs" id="wr-ph"><div class="eb" onclick="sR('wr-ph',0,this)">1</div><div class="eb" onclick="sR('wr-ph',1,this)">2</div><div class="eb" onclick="sR('wr-ph',2,this)">3</div><div class="eb" onclick="sR('wr-ph',3,this)">4</div><div class="eb" onclick="sR('wr-ph',4,this)">5</div></div></div>
+        <div class="er"><div class="el">Mental</div><div class="ebs" id="wr-me"><div class="eb" onclick="sR('wr-me',0,this)">1</div><div class="eb" onclick="sR('wr-me',1,this)">2</div><div class="eb" onclick="sR('wr-me',2,this)">3</div><div class="eb" onclick="sR('wr-me',3,this)">4</div><div class="eb" onclick="sR('wr-me',4,this)">5</div></div></div>
+        <div class="er" style="border:none"><div class="el">Emotional</div><div class="ebs" id="wr-em"><div class="eb" onclick="sR('wr-em',0,this)">1</div><div class="eb" onclick="sR('wr-em',1,this)">2</div><div class="eb" onclick="sR('wr-em',2,this)">3</div><div class="eb" onclick="sR('wr-em',3,this)">4</div><div class="eb" onclick="sR('wr-em',4,this)">5</div></div></div>
+      </div>
+    </div>
+    <div>
+      <div class="sec" style="font-size:16px;margin-bottom:12px">Ausblick</div>
+      <div class="c" style="margin-bottom:10px">
+        <div class="ct" style="margin-bottom:8px">3 Prioritäten nächste Woche <span class="lb">↗ live</span></div>
+        <ul class="cl">
+          <li><div class="ck" onclick="tCk(this)"></div><textarea class="if" id="wp1" rows="1" style="min-height:28px;padding:3px 8px" placeholder="Priorität 1 → Quartalsziel: ___"></textarea></li>
+          <li><div class="ck" onclick="tCk(this)"></div><textarea class="if" id="wp2" rows="1" style="min-height:28px;padding:3px 8px" placeholder="Priorität 2"></textarea></li>
+          <li><div class="ck" onclick="tCk(this)"></div><textarea class="if" id="wp3" rows="1" style="min-height:28px;padding:3px 8px" placeholder="Priorität 3"></textarea></li>
+        </ul>
+      </div>
+      <div class="c" style="margin-bottom:10px">
+        <div class="ig"><label class="il">Was delegiere oder lösche ich?</label><textarea class="if" id="wr-del" rows="2" placeholder="Was darf nächste Woche nicht auf meinem Tisch landen?"></textarea></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Entscheidung, die ich vor mir herschiebe</label><textarea class="if" id="wr-dec" rows="2" placeholder="Name + Deadline..."></textarea></div>
+      </div>
+      <div class="c m">
+        <div class="ig"><label class="il">Wichtigste Erkenntnis</label><textarea class="if" id="wr-in" rows="2" placeholder="Was war der wichtigste Gedanke?"></textarea></div>
+        <div class="ig"><label class="il">Wofür bin ich dankbar?</label><textarea class="if" id="wr-th" rows="2" placeholder="..."></textarea></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Worauf bin ich stolz?</label><textarea class="if" id="wr-pr" rows="2" placeholder="Fortschritte anerkennen..."></textarea></div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn btn-p" onclick="archiveWeekNow()">📅 Review speichern & archivieren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ▸ PRIORITÄTEN ◂ -->
+<div id="page-priorities" class="page">
+  <div class="p-ey">Diese Woche</div>
+  <div class="p-h">Wochen-<em>Prioritäten</em></div>
+  <div class="p-d">Maximal 3 — live verknüpft mit Dashboard und Weekly Review.</div>
+  <hr class="p-hr">
+  <div style="background:var(--acc-lt);border:1px solid var(--acc-bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--acc);margin-bottom:16px">
+    Was du hier einträgst, siehst du sofort im Dashboard-Panel.
+  </div>
+  <div class="c m" style="margin-bottom:12px">
+    <div class="ct" style="color:var(--acc);font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;margin-bottom:8px">Business-MIT der Woche <span class="lb">↗ live</span></div>
+    <textarea class="if" id="wmit" rows="2" placeholder="Welche eine Aktion bewegt diese Woche die Nadel?"></textarea>
+  </div>
+  <div class="c" style="margin-bottom:12px">
+    <div class="ct" style="margin-bottom:8px">Top 3 Prioritäten <span class="lb">↗ live</span></div>
+    <ul class="cl">
+      <li><div class="ck" onclick="tCk(this)"></div><div style="flex:1"><input class="ii" id="p1" placeholder="Priorität 1"><div class="cl-m"><input class="ii" id="p1g" style="font-size:10px;color:var(--tx4)" placeholder="→ Quartalsziel: ___"></div></div></li>
+      <li><div class="ck" onclick="tCk(this)"></div><div style="flex:1"><input class="ii" id="p2" placeholder="Priorität 2"><div class="cl-m"><input class="ii" id="p2g" style="font-size:10px;color:var(--tx4)" placeholder="→ Quartalsziel: ___"></div></div></li>
+      <li><div class="ck" onclick="tCk(this)"></div><div style="flex:1"><input class="ii" id="p3" placeholder="Priorität 3"><div class="cl-m"><input class="ii" id="p3g" style="font-size:10px;color:var(--tx4)" placeholder="→ Quartalsziel: ___"></div></div></li>
+    </ul>
+  </div>
+  <div class="c">
+    <div class="ig"><label class="il">Pipeline-Check</label><textarea class="if" id="pipe" rows="2" placeholder="Wer braucht Follow-up?"></textarea></div>
+    <div class="ig" style="margin-bottom:0"><label class="il">Offene Entscheidung</label><textarea class="if" id="odec" rows="2" placeholder="Entscheidung + Deadline..."></textarea></div>
+  </div>
+</div>
+
+<!-- ▸ ENERGIE ◂ -->
+<div id="page-energie" class="page">
+  <div class="p-ey">Energie-System</div>
+  <div class="p-h">Energie-<em>Bilanz</em></div>
+  <div class="p-d">Energie ist deine einzige nicht-kaufbare Ressource.</div>
+  <hr class="p-hr">
+  <div class="g2" style="margin-bottom:12px">
+    <div class="c gr">
+      <div class="ct" style="color:var(--grn);margin-bottom:8px">Energie-Quellen</div>
+      <ul class="cl">
+        <li><div class="ck on" onclick="tCk(this)"></div><div><div class="cl-l">Screen-freie Morgenroutine</div><div class="cl-m" style="color:var(--grn)">✓ aktiv</div></div></li>
+        <li><div class="ck on" onclick="tCk(this)"></div><div><div class="cl-l">Tägliche Bewegung</div><div class="cl-m" style="color:var(--grn)">✓ aktiv</div></div></li>
+        <li><div class="ck on" onclick="tCk(this)"></div><div><div class="cl-l">Meditation</div><div class="cl-m" style="color:var(--grn)">✓ aktiv</div></div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">90-min Tiefe Arbeit</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Echte Pausen (kein Handy)</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div><div class="cl-l">Hard Stop ≤ 19:00</div><div class="cl-m" style="color:var(--rst)">⚠ einzuführen</div></div></li>
+      </ul>
+    </div>
+    <div class="c r">
+      <div class="ct" style="color:var(--rst);margin-bottom:8px">Energie-Räuber</div>
+      <ul class="cl">
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Entscheidungen ohne Kriterien</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Delegierbare Tasks selbst</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Kontextwechsel ohne Puffer</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Reaktiver Modus (Inbox first)</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Perfektionismus bei Nicht-Kritischem</div></li>
+        <li><div class="ck" onclick="tCk(this)"></div><div class="cl-l">Zu viele offene Loops im Kopf</div></li>
+      </ul>
+    </div>
+  </div>
+  <div class="c" style="margin-bottom:12px">
+    <div class="ct" style="margin-bottom:8px">Wöchentliche Bilanz</div>
+    <div class="g3" style="gap:8px;margin-bottom:10px">
+      <div><label class="il">Körperlich (1–10)</label><input class="if" id="e-ph" style="min-height:32px" placeholder="—"></div>
+      <div><label class="il">Mental (1–10)</label><input class="if" id="e-me" style="min-height:32px" placeholder="—"></div>
+      <div><label class="il">Emotional (1–10)</label><input class="if" id="e-em" style="min-height:32px" placeholder="—"></div>
+    </div>
+    <label class="il">Was hat diese Woche meine Energie am meisten beeinflusst?</label>
+    <textarea class="if" id="e-im" rows="3" placeholder="Positiv und negativ — konkret..."></textarea>
+  </div>
+  <div class="c">
+    <div class="ct" style="margin-bottom:6px">Meine Grenzen (nicht verhandelbar)</div>
+    <textarea class="if" id="e-ru" rows="4" placeholder="z.B. Keine Meetings vor 10:00&#10;Inbox nur 2x täglich&#10;Kein Work nach 19:00..."></textarea>
+  </div>
+</div>
+
+<!-- ▸ QUARTALSZIELE ◂ -->
+<div id="page-goals" class="page">
+  <div class="p-ey">Planungs-System</div>
+  <div class="p-h">Quartalsziele <em>Q2 2026</em></div>
+  <div class="p-d">Max. 3 Ziele — für 90 Tage unveränderlich. Live verknüpft mit Dashboard und Weekly Review.</div>
+  <hr class="p-hr">
+  <div style="background:var(--acc-lt);border:1px solid var(--acc-bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--acc);margin-bottom:16px">
+    Änderungen erscheinen sofort im Dashboard-Panel und im Weekly Review.
+  </div>
+
+  <!-- Ziel 1 -->
+  <div class="c r" style="margin-bottom:10px">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--b3);line-height:1;font-weight:600;flex-shrink:0">01</div>
+      <div style="flex:1">
+        <input class="ii" id="g1t" style="font-size:13px;font-weight:500;color:var(--b9);border-bottom:1px dashed var(--bd2);padding-bottom:3px;width:100%" placeholder="Ziel 1: z.B. Ersten zahlenden Kunden gewinnen">
+        <input class="ii" id="g1w" style="font-size:11px;color:var(--tx4);margin-top:5px" placeholder="Warum ist dieses Ziel jetzt wichtig?">
+      </div>
+      <span class="tag t-r">Prio 1</span>
+    </div>
+    <div><label class="il">Fortschritt</label><input type="range" id="g1p" min="0" max="100" value="0" oninput="upP('g1')" style="width:100%;accent-color:var(--rst)">
+    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tx4);margin:2px 0 8px"><span>0%</span><span id="g1pct" style="color:var(--rst)">0%</span><span>100%</span></div></div>
+    <textarea class="if" id="g1k" rows="3" placeholder="KR1: messbar + konkret&#10;KR2: messbar + konkret&#10;KR3: optional"></textarea>
+  </div>
+
+  <!-- Ziel 2 -->
+  <div class="c m" style="margin-bottom:10px">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--b3);line-height:1;font-weight:600;flex-shrink:0">02</div>
+      <div style="flex:1">
+        <input class="ii" id="g2t" style="font-size:13px;font-weight:500;color:var(--b9);border-bottom:1px dashed var(--bd2);padding-bottom:3px;width:100%" placeholder="Ziel 2">
+        <input class="ii" id="g2w" style="font-size:11px;color:var(--tx4);margin-top:5px" placeholder="Warum ist dieses Ziel jetzt wichtig?">
+      </div>
+      <span class="tag t-m">Prio 2</span>
+    </div>
+    <div><label class="il">Fortschritt</label><input type="range" id="g2p" min="0" max="100" value="0" oninput="upP('g2')" style="width:100%;accent-color:var(--acc)">
+    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tx4);margin:2px 0 8px"><span>0%</span><span id="g2pct" style="color:var(--acc)">0%</span><span>100%</span></div></div>
+    <textarea class="if" id="g2k" rows="3" placeholder="KR1: messbar + konkret&#10;KR2: messbar + konkret&#10;KR3: optional"></textarea>
+  </div>
+
+  <!-- Ziel 3 -->
+  <div class="c gr" style="margin-bottom:10px">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--b3);line-height:1;font-weight:600;flex-shrink:0">03</div>
+      <div style="flex:1">
+        <input class="ii" id="g3t" style="font-size:13px;font-weight:500;color:var(--b9);border-bottom:1px dashed var(--bd2);padding-bottom:3px;width:100%" placeholder="Ziel 3">
+        <input class="ii" id="g3w" style="font-size:11px;color:var(--tx4);margin-top:5px" placeholder="Warum ist dieses Ziel jetzt wichtig?">
+      </div>
+      <span class="tag t-gr">Prio 3</span>
+    </div>
+    <div><label class="il">Fortschritt</label><input type="range" id="g3p" min="0" max="100" value="0" oninput="upP('g3')" style="width:100%;accent-color:var(--grn)">
+    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--tx4);margin:2px 0 8px"><span>0%</span><span id="g3pct" style="color:var(--grn)">0%</span><span>100%</span></div></div>
+    <textarea class="if" id="g3k" rows="3" placeholder="KR1: messbar + konkret&#10;KR2: messbar + konkret&#10;KR3: optional"></textarea>
+  </div>
+</div>
+
+<!-- ▸ VISION ◂ -->
+<div id="page-vision" class="page">
+  <div class="p-ey">Strategie</div>
+  <div class="p-h">Nordsterner & <em>Vision</em></div>
+  <div class="p-d">Der langfristige Kompass. Jährlich überprüfen — täglich spüren. Erscheint live im Dashboard.</div>
+  <hr class="p-hr">
+  <div class="c g" style="margin-bottom:12px">
+    <div class="ct" style="color:var(--gold);margin-bottom:8px">Jahresvision 2026 <span class="lb">↗ im Dashboard</span></div>
+    <textarea class="if" id="vis" rows="5" placeholder="Ich mache €___ MRR. Ich arbeite von ___. Ich habe ___ frei. Mein Business läuft ohne mich für ___ Tage..."></textarea>
+  </div>
+  <div class="g2" style="margin-bottom:12px">
+    <div class="c"><div class="ct" style="margin-bottom:8px">Finanziell</div>
+      <div class="ig"><label class="il">Ziel-MRR</label><input class="if" id="v-mrr" style="min-height:32px" placeholder="€ ___"></div>
+      <div class="ig" style="margin-bottom:0"><label class="il">Bis wann</label><input class="if" id="v-dat" style="min-height:32px" placeholder="Zeitframe"></div>
+    </div>
+    <div class="c"><div class="ct" style="margin-bottom:8px">Lokal & zeitlich</div>
+      <div class="ig"><label class="il">Von wo?</label><input class="if" id="v-loc" style="min-height:32px" placeholder="Ort(e)"></div>
+      <div class="ig" style="margin-bottom:0"><label class="il">Reise-Tage/Jahr</label><input class="if" id="v-tr" style="min-height:32px" placeholder="— Tage"></div>
+    </div>
+  </div>
+  <div class="c">
+    <div class="ct" style="margin-bottom:6px">Warum das alles — tiefster Antrieb</div>
+    <textarea class="if" id="v-why" rows="4" placeholder="Nicht wofür, sondern warum. Was treibt dich wirklich an?"></textarea>
+  </div>
+</div>
+
+<!-- ▸ ENTSCHEIDUNGEN ◂ -->
+<div id="page-decisions" class="page">
+  <div class="p-ey">Persönliches OS</div>
+  <div class="p-h">Entscheidungs-<em>Log</em></div>
+  <div class="p-d">Muster erkennen, Qualität steigern. Perfektionismus + zu schnelles Vertrauen — deine bekannten Risiken.</div>
+  <hr class="p-hr">
+  <div class="c m" style="margin-bottom:14px">
+    <div class="ct" style="margin-bottom:10px">Neue Entscheidung</div>
+    <div class="g2">
+      <div>
+        <div class="ig"><label class="il">Entscheidung</label><input class="if" id="d-ttl" style="min-height:32px" placeholder="Was ist die Entscheidung?"></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Optionen</label><textarea class="if" id="d-opt" rows="3" placeholder="A: ...&#10;B: ...&#10;Ich wähle: ..."></textarea></div>
+      </div>
+      <div>
+        <div class="ig"><label class="il">Erwartetes Ergebnis</label><textarea class="if" id="d-exp" rows="3" placeholder="Was erwarte ich in 30/90 Tagen?"></textarea></div>
+        <div class="ig" style="margin-bottom:0"><label class="il">Review in</label><select class="if" id="d-rev" style="min-height:32px"><option value="30">30 Tagen</option><option value="60">60 Tagen</option><option value="90">90 Tagen</option></select></div>
+      </div>
+    </div>
+    <button class="btn btn-p" style="margin-top:10px" onclick="addDec()">+ Speichern</button>
+  </div>
+  <div id="dec-list"></div>
+</div>
+
+<!-- ▸ TAGES-ARCHIV ◂ -->
+<div id="page-arch-days" class="page">
+  <div class="p-ey">Archiv</div>
+  <div class="p-h">Tages-<em>Archiv</em></div>
+  <div class="p-d">Automatisch archiviert bei Tageswechsel.</div>
+  <hr class="p-hr">
+  <div id="arch-days-content"></div>
+</div>
+
+<!-- ▸ WOCHEN-ARCHIV ◂ -->
+<div id="page-arch-weeks" class="page">
+  <div class="p-ey">Archiv</div>
+  <div class="p-h">Wochen-<em>Archiv</em></div>
+  <div class="p-d">Alle abgeschlossenen Weekly Reviews.</div>
+  <hr class="p-hr">
+  <div id="arch-weeks-content"></div>
+</div>
+
+</main>
+
+<!-- MODALS -->
+<div class="mbg" id="m-day"><div class="modal"><button class="mc" onclick="cM('m-day')">×</button><div id="m-day-body"></div></div></div>
+<div class="mbg" id="m-week"><div class="modal"><button class="mc" onclick="cM('m-week')">×</button><div id="m-week-body"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ SCRIPT ═══════════════ -->
+
+<!-- MODALS -->
+<div class="mbg" id="m-day"><div class="modal"><button class="mc" onclick="cM('m-day')">×</button><div id="m-day-body"></div></div></div>
+<div class="mbg" id="m-week"><div class="modal"><button class="mc" onclick="cM('m-week')">×</button><div id="m-week-body"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- ═══ LOGIN OVERLAY ═══ -->
+<div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:#f8f6f1;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;transition:opacity .3s">
+  <div style="width:100%;max-width:380px;padding:24px">
+
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:38px;color:#08111e;font-weight:600;line-height:1.1;margin-bottom:8px">Personal<br><em style="color:#1c3457">OS</em></div>
+      <div style="font-size:9px;color:#b0aa9e;font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase">Valentin Breckwoldt</div>
+    </div>
+
+    <div style="background:#fff;border:1px solid #e2ddd5;border-radius:14px;padding:28px 26px;box-shadow:0 2px 16px rgba(8,17,30,.07)">
+
+      <div id="auth-mode-label" style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#252018;font-weight:600;margin-bottom:4px">Anmelden</div>
+      <div id="auth-mode-sub" style="font-size:12px;color:#908a80;margin-bottom:20px">Mit deinem Account einloggen</div>
+
+      <div id="auth-err" style="display:none;background:#faf0ec;border:1px solid #d8a898;border-radius:6px;padding:9px 12px;font-size:12px;color:#8c3820;margin-bottom:14px;line-height:1.5"></div>
+      <div id="auth-ok" style="display:none;background:#edf6f0;border:1px solid #96cca8;border-radius:6px;padding:9px 12px;font-size:12px;color:#2e6640;margin-bottom:14px;line-height:1.5"></div>
+
+      <div style="margin-bottom:12px">
+        <div style="font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#b0aa9e;margin-bottom:5px;font-family:'JetBrains Mono',monospace">E-Mail</div>
+        <input id="a-email" type="email" placeholder="deine@email.com" onkeydown="if(event.key==='Enter')aSubmit()"
+          style="width:100%;background:#edeae4;border:1.5px solid #e2ddd5;border-radius:7px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:#252018;outline:none;transition:border-color .13s"
+          onfocus="this.style.borderColor='#1c3457'" onblur="this.style.borderColor='#e2ddd5'">
+      </div>
+
+      <div id="pw-wrap" style="margin-bottom:20px">
+        <div style="font-size:9px;font-weight:500;letter-spacing:.09em;text-transform:uppercase;color:#b0aa9e;margin-bottom:5px;font-family:'JetBrains Mono',monospace">Passwort</div>
+        <input id="a-pw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')aSubmit()"
+          style="width:100%;background:#edeae4;border:1.5px solid #e2ddd5;border-radius:7px;padding:10px 12px;font-family:'Outfit',sans-serif;font-size:13px;color:#252018;outline:none;transition:border-color .13s"
+          onfocus="this.style.borderColor='#1c3457'" onblur="this.style.borderColor='#e2ddd5'">
+      </div>
+
+      <button id="a-btn" onclick="aSubmit()"
+        style="width:100%;background:#1c3457;color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .13s;margin-bottom:14px"
+        onmouseover="this.style.background='#22406c'" onmouseout="this.style.background='#1c3457'">Anmelden</button>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:7px">
+        <button id="a-toggle" onclick="aToggleMode()"
+          style="background:none;border:none;font-size:12px;color:#4a78b8;cursor:pointer;font-family:'Outfit',sans-serif;text-decoration:underline">
+          Noch kein Account? Registrieren
+        </button>
+        <button id="a-reset-btn" onclick="aReset()"
+          style="background:none;border:none;font-size:11px;color:#b0aa9e;cursor:pointer;font-family:'Outfit',sans-serif">
+          Passwort vergessen
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:18px;font-size:9px;color:#cec8be;font-family:'JetBrains Mono',monospace;letter-spacing:.04em">
+      Daten verschlüsselt · Supabase EU West · Privat
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════
+   CONFIG — deine Supabase Keys hier eintragen
+══════════════════════════════════════════ */
+const SB_URL = 'https://amlorumedifvtitxmyed.supabase.co';   // https://xxx.supabase.co
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbG9ydW1lZGlmdnRpdHhteWVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODk2NTQsImV4cCI6MjA4OTE2NTY1NH0.5mUvP86iesfc8r-xVNci5IJfq4kYUTXn9XIRC-dLm9g';        // eyJhbGci...
+/* ════════════════════════════════════════ */
+
+let _sb, _user, _syncT, _lastHash;
+
+/* ─ SUPABASE INIT ─ */
+function sbInit() {
+  try { _sb = window.supabase.createClient(SB_URL, SB_KEY); } catch(e) {}
+}
+
+/* ─ STORAGE — user-scoped ─ */
+function uid() { return _user?.id || 'local'; }
+function pkey(k) { return `vb_${uid()}_${k}`; }
+const S = {
+  g: k => { try { return JSON.parse(localStorage.getItem(pkey(k))) } catch { return null } },
+  s: (k,v) => { localStorage.setItem(pkey(k), JSON.stringify(v)); scheduleUp(); },
+  d: k => { localStorage.removeItem(pkey(k)); scheduleUp(); }
+};
+
+/* ─ AUTH STATE ─ */
+async function checkSession() {
+  if (!_sb) { showApp(); setSyncSt('no-config'); return; }
+  const { data } = await _sb.auth.getSession();
+  if (data?.session?.user) {
+    _user = data.session.user;
+    onLogin();
+  } else {
+    showLogin();
+  }
+  _sb.auth.onAuthStateChange((evt, session) => {
+    if (evt === 'SIGNED_IN' && session?.user) { _user = session.user; onLogin(); }
+    if (evt === 'SIGNED_OUT') { _user = null; onLogout(); }
+  });
+}
+
+function onLogin() {
+  // Show user area in sidebar
+  const area = document.getElementById('sb-user-area');
+  if (area) area.style.display = 'block';
+  const email = _user?.email || '';
+  const av = document.getElementById('sb-avatar');
+  if (av) av.textContent = email.substring(0,1).toUpperCase() || 'U';
+  const nm = document.getElementById('sb-user-name');
+  if (nm) nm.textContent = email.split('@')[0] || 'User';
+  const em = document.getElementById('sb-user-email');
+  if (em) em.textContent = email;
+  showApp();
+  bootApp();
+}
+
+function onLogout() {
+  document.getElementById('sb-user-area').style.display = 'none';
+  // Clear user-specific local data from memory (not delete — just reload page)
+  window.location.reload();
+}
+
+function showApp() {
+  const ov = document.getElementById('login-overlay');
+  if (ov) { ov.style.opacity = '0'; setTimeout(() => ov.style.display = 'none', 300); }
+  document.querySelector('.sb')?.style.setProperty('display', 'flex');
+  document.querySelector('.main')?.style.setProperty('display', 'block');
+}
+
+function showLogin() {
+  const ov = document.getElementById('login-overlay');
+  if (ov) { ov.style.display = 'flex'; ov.style.opacity = '1'; }
+}
+
+/* ─ AUTH FORMS ─ */
+let _authMode = 'login'; // login | register | reset
+
+function aMsg(type, msg) {
+  document.getElementById('auth-err').style.display = type === 'err' ? 'block' : 'none';
+  document.getElementById('auth-ok').style.display = type === 'ok' ? 'block' : 'none';
+  if (type === 'err') document.getElementById('auth-err').textContent = msg;
+  if (type === 'ok') document.getElementById('auth-ok').textContent = msg;
+}
+function aClear() { aMsg('none', ''); }
+
+function aToggleMode() {
+  _authMode = _authMode === 'login' ? 'register' : 'login';
+  const isReg = _authMode === 'register';
+  document.getElementById('auth-mode-label').textContent = isReg ? 'Registrieren' : 'Anmelden';
+  document.getElementById('auth-mode-sub').textContent = isReg ? 'Neuen Account erstellen' : 'Mit deinem Account einloggen';
+  document.getElementById('a-btn').textContent = isReg ? 'Account erstellen' : 'Anmelden';
+  document.getElementById('a-toggle').textContent = isReg ? 'Bereits registriert? Anmelden' : 'Noch kein Account? Registrieren';
+  document.getElementById('pw-wrap').style.display = 'block';
+  document.getElementById('a-reset-btn').style.display = isReg ? 'none' : 'block';
+  aClear();
+}
+
+function aReset() {
+  _authMode = 'reset';
+  document.getElementById('auth-mode-label').textContent = 'Passwort zurücksetzen';
+  document.getElementById('auth-mode-sub').textContent = 'Wir schicken dir einen Reset-Link';
+  document.getElementById('a-btn').textContent = 'Link senden';
+  document.getElementById('pw-wrap').style.display = 'none';
+  document.getElementById('a-toggle').textContent = 'Zurück zum Login';
+  document.getElementById('a-reset-btn').style.display = 'none';
+  aClear();
+}
+
+async function aSubmit() {
+  if (!_sb) { aMsg('err', 'Supabase nicht konfiguriert — bitte Keys eintragen.'); return; }
+  const email = document.getElementById('a-email').value.trim();
+  const pw = document.getElementById('a-pw').value;
+  const btn = document.getElementById('a-btn');
+
+  if (!email) { aMsg('err', 'Bitte E-Mail eingeben.'); return; }
+  btn.textContent = '...'; btn.disabled = true;
+
+  try {
+    if (_authMode === 'login') {
+      const { error } = await _sb.auth.signInWithPassword({ email, password: pw });
+      if (error) aMsg('err', error.message === 'Invalid login credentials' ? 'E-Mail oder Passwort falsch.' : error.message);
+    } else if (_authMode === 'register') {
+      if (pw.length < 6) { aMsg('err', 'Passwort muss mindestens 6 Zeichen haben.'); return; }
+      const { error } = await _sb.auth.signUp({ email, password: pw });
+      if (error) aMsg('err', error.message);
+      else aMsg('ok', 'Bitte E-Mail bestätigen — dann kannst du dich einloggen.');
+    } else if (_authMode === 'reset') {
+      const { error } = await _sb.auth.resetPasswordForEmail(email);
+      if (error) aMsg('err', error.message);
+      else aMsg('ok', 'Reset-Link wurde gesendet. Schau in dein Postfach.');
+    }
+  } finally {
+    const labels = { login:'Anmelden', register:'Account erstellen', reset:'Link senden' };
+    btn.textContent = labels[_authMode]; btn.disabled = false;
+  }
+}
+
+async function authSignOut() {
+  if (_sb) await _sb.auth.signOut();
+}
+
+/* ─ DATA SYNC ─ */
+function getAllData() {
+  const prefix = `vb_${uid()}_`;
+  const out = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k?.startsWith(prefix)) out[k.slice(prefix.length)] = (() => { try { return JSON.parse(localStorage.getItem(k)) } catch { return localStorage.getItem(k) } })();
+  }
+  return out;
+}
+
+function setAllData(obj) {
+  const prefix = `vb_${uid()}_`;
+  Object.entries(obj).forEach(([k, v]) => localStorage.setItem(prefix + k, JSON.stringify(v)));
+}
+
+function dataHash(obj) { return JSON.stringify(obj).length + '_' + Object.keys(obj).length; }
+
+async function syncUp() {
+  if (!_sb || !_user) return;
+  const data = getAllData();
+  const h = dataHash(data);
+  if (h === _lastHash) return;
+  try {
+    const { error } = await _sb.from('os_data').upsert({ id: _user.id, data, updated_at: new Date().toISOString() });
+    if (!error) { _lastHash = h; setSyncSt('synced'); }
+    else setSyncSt('error');
+  } catch { setSyncSt('error'); }
+}
+
+async function syncDown() {
+  if (!_sb || !_user) return;
+  setSyncSt('syncing');
+  try {
+    const { data, error } = await _sb.from('os_data').select('data').eq('id', _user.id).single();
+    if (!error && data?.data) {
+      setAllData(data.data);
+      _lastHash = dataHash(data.data);
+      // Reload current page data
+      const pg = document.querySelector('.page.on');
+      if (pg) { const id = pg.id.replace('page-',''); if (window._pageLoaders?.[id]) window._pageLoaders[id](); }
+      refreshDash();
+    }
+    setSyncSt('synced');
+  } catch { setSyncSt('offline'); }
+}
+
+function scheduleUp() {
+  setSyncSt('syncing');
+  clearTimeout(_syncT);
+  _syncT = setTimeout(syncUp, 1500);
+}
+
+function setSyncSt(state) {
+  const lbl = document.getElementById('save-lbl');
+  const dot = document.getElementById('sync-dot');
+  if (!lbl) return;
+  const map = { synced:'☁ Sync', syncing:'↑ Sync...', error:'⚠ Fehler', offline:'Offline', 'no-config':'Lokal' };
+  lbl.textContent = map[state] || state;
+  if (dot) {
+    const colors = { synced:'#5aae78', syncing:'#e8c060', error:'#c05050', offline:'#b0aa9e', 'no-config':'#e8c060' };
+    dot.style.background = colors[state] || '#b0aa9e';
+  }
+}
+
+/* ─ STORAGE (override from V3 base) ─ */
+/* already defined above as S = { g, s, d } with user-scoped keys */
+
+/* ─ DATE ─ */
+const iso=()=>new Date().toISOString().split('T')[0];
+function fmt(d){if(!d)return'—';const x=new Date(d+'T12:00:00');return x.toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
+function kw(d){const x=new Date((d||iso())+'T12:00:00');const j=new Date(x.getFullYear(),0,4);return Math.ceil(((x-j)/86400000+j.getDay()+1)/7)}
+/* ─ TOAST ─ */
+function toast(m,ms=2600){const e=document.getElementById('toast');e.textContent=m;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),ms)}
+/* ─ NAV ─ */
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.n').forEach(n=>n.classList.remove('on'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('on');
+  if(el)el.classList.add('on');
+  else document.querySelectorAll('.n').forEach(n=>{if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('on')});
+  window.scrollTo(0,0);
+  const r={
+    dashboard:()=>{loadF([['mit','d.mit'],['t1','d.t1'],['t1a','d.t1a'],['t2','d.t2'],['t3','d.t3']]);lR([['e-en','r.e-en'],['e-fo','r.e-fo'],['e-mo','r.e-mo']]);refreshDash()},
+    wins:()=>loadF([['w1','d.w1'],['w2','d.w2'],['w3','d.w3'],['learn','d.learn'],['grat','d.grat'],['tmit','d.tmit'],['ttask','d.ttask']]),
+    habits:()=>renderHabs(),
+    weekly:()=>{loadF([['wr-ach','wr.ach'],['wr-co','wr.co'],['wr-ga','wr.ga'],['wr-g1','wr.g1'],['wr-g2','wr.g2'],['wr-g3','wr.g3'],['wr-del','wr.del'],['wr-dec','wr.dec'],['wr-in','wr.in'],['wr-th','wr.th'],['wr-pr','wr.pr'],['wp1','pr.p1'],['wp2','pr.p2'],['wp3','pr.p3']]);lR([['wr-ph','r.wr-ph'],['wr-me','r.wr-me'],['wr-em','r.wr-em']]);renderWRGoals()},
+    priorities:()=>loadF([['wmit','pr.wmit'],['p1','pr.p1'],['p1g','pr.p1g'],['p2','pr.p2'],['p2g','pr.p2g'],['p3','pr.p3'],['p3g','pr.p3g'],['pipe','pr.pipe'],['odec','pr.odec']]),
+    energie:()=>loadF([['e-ph','en.ph'],['e-me','en.me'],['e-em','en.em'],['e-im','en.im'],['e-ru','en.ru']]),
+    goals:()=>{loadF([['g1t','g.g1t'],['g1w','g.g1w'],['g1k','g.g1k'],['g2t','g.g2t'],['g2w','g.g2w'],['g2k','g.g2k'],['g3t','g.g3t'],['g3w','g.g3w'],['g3k','g.g3k']]);['g1','g2','g3'].forEach(g=>{const v=S.g('g.'+g+'p');const e=document.getElementById(g+'p');if(e&&v!==null){e.value=v;upP(g)}})},
+    vision:()=>loadF([['vis','v.vis'],['v-mrr','v.mrr'],['v-dat','v.dat'],['v-loc','v.loc'],['v-tr','v.tr'],['v-why','v.why']]),
+    decisions:()=>renderDecs(),
+    'arch-days':()=>renderDayArch(),
+    'arch-weeks':()=>renderWeekArch(),
+  };
+  if(r[id])r[id]();
+}
+/* ─ FIELD HELPERS ─ */
+function gv(id){const e=document.getElementById(id);return e?e.value:''}
+function sv(id,v){const e=document.getElementById(id);if(e&&v!=null)e.value=v}
+function loadF(pairs){pairs.forEach(([id,k])=>sv(id,S.g(k)))}
+function saveF(pairs){pairs.forEach(([id,k])=>S.s(k,gv(id)))}
+const _R={};
+function sR(g,i,el){document.querySelectorAll('#'+g+' .eb').forEach(b=>b.classList.remove('on'));el.classList.add('on');_R[g]=i+1;S.s('r.'+g,i+1)}
+function lR(pairs){pairs.forEach(([g,k])=>{const v=S.g(k)||S.g('r.'+g);if(!v)return;document.querySelectorAll('#'+g+' .eb').forEach((b,i)=>{b.classList.remove('on');if(i===v-1){b.classList.add('on');_R[g]=v}})})}
+function gR(g){return _R[g]||S.g('r.'+g)||0}
+/* ─ CHECKBOX ─ */
+function tCk(el){el.classList.toggle('on');el.innerHTML=el.classList.contains('on')?'<span style="color:#fff;font-size:8px;font-weight:700">✓</span>':''}
+/* ─ PROGRESS ─ */
+function upP(g){const v=document.getElementById(g+'p')?.value||0;const e=document.getElementById(g+'pct');if(e)e.textContent=v+'%';S.s('g.'+g+'p',v);refreshDash()}
+/* ─ AUTO SAVE ─ */
+let sT;
+document.addEventListener('input',()=>{clearTimeout(sT);sT=setTimeout(()=>persist(),700)});
+function persist(){
+  const a=document.querySelector('.page.on');if(!a)return;
+  const id=a.id.replace('page-','');
+  const m={
+    dashboard:()=>{saveF([['mit','d.mit'],['t1','d.t1'],['t1a','d.t1a'],['t2','d.t2'],['t3','d.t3']]);S.s('r.e-en',gR('e-en'));S.s('r.e-fo',gR('e-fo'));S.s('r.e-mo',gR('e-mo'));refreshDash()},
+    wins:()=>saveF([['w1','d.w1'],['w2','d.w2'],['w3','d.w3'],['learn','d.learn'],['grat','d.grat'],['tmit','d.tmit'],['ttask','d.ttask']]),
+    weekly:()=>{saveF([['wr-ach','wr.ach'],['wr-co','wr.co'],['wr-ga','wr.ga'],['wr-g1','wr.g1'],['wr-g2','wr.g2'],['wr-g3','wr.g3'],['wr-del','wr.del'],['wr-dec','wr.dec'],['wr-in','wr.in'],['wr-th','wr.th'],['wr-pr','wr.pr'],['wp1','pr.p1'],['wp2','pr.p2'],['wp3','pr.p3']]);S.s('r.wr-ph',gR('wr-ph'));S.s('r.wr-me',gR('wr-me'));S.s('r.wr-em',gR('wr-em'));refreshDash()},
+    priorities:()=>{saveF([['wmit','pr.wmit'],['p1','pr.p1'],['p1g','pr.p1g'],['p2','pr.p2'],['p2g','pr.p2g'],['p3','pr.p3'],['p3g','pr.p3g'],['pipe','pr.pipe'],['odec','pr.odec']]);sv('wp1',gv('p1'));sv('wp2',gv('p2'));sv('wp3',gv('p3'));refreshDash()},
+    energie:()=>saveF([['e-ph','en.ph'],['e-me','en.me'],['e-em','en.em'],['e-im','en.im'],['e-ru','en.ru']]),
+    goals:()=>{saveF([['g1t','g.g1t'],['g1w','g.g1w'],['g1k','g.g1k'],['g2t','g.g2t'],['g2w','g.g2w'],['g2k','g.g2k'],['g3t','g.g3t'],['g3w','g.g3w'],['g3k','g.g3k']]);['g1','g2','g3'].forEach(g=>S.s('g.'+g+'p',document.getElementById(g+'p')?.value||0));refreshDash()},
+    vision:()=>{saveF([['vis','v.vis'],['v-mrr','v.mrr'],['v-dat','v.dat'],['v-loc','v.loc'],['v-tr','v.tr'],['v-why','v.why']]);refreshDash()},
+  };
+  if(m[id])m[id]();
+}
+/* ─ DASHBOARD REFRESH ─ */
+function refreshDash(){
+  const gp=document.getElementById('dash-goals');
+  if(gp){
+    const gs=['g1','g2','g3'].map(g=>({t:S.g('g.'+g+'t'),p:S.g('g.'+g+'p')||0,g}));
+    const filled=gs.filter(x=>x.t);
+    if(!filled.length){gp.innerHTML='<div class="lp-empty">Ziele setzen →</div>'}
+    else gp.innerHTML=filled.map((x,i)=>`
+      <div class="gm"><div class="gm-num">0${i+1}</div>
+      <div class="gm-title">${x.t}</div>
+      <div class="gm-pct">${x.p}%</div>
+      <div class="gm-bar"><div class="gm-fill" style="width:${x.p}%"></div></div></div>`).join('');
+  }
+  const pp=document.getElementById('dash-prio');
+  if(pp){
+    const wmit=S.g('pr.wmit');
+    const ps=[S.g('pr.p1'),S.g('pr.p2'),S.g('pr.p3')].filter(Boolean);
+    if(!wmit&&!ps.length){pp.innerHTML='<div class="lp-empty">Prioritäten setzen →</div>'}
+    else pp.innerHTML=(wmit?`<div style="font-size:10px;color:var(--acc);font-family:'JetBrains Mono',monospace;margin-bottom:5px">${wmit}</div>`:'')
+      +ps.map((p,i)=>`<div style="font-size:12px;color:var(--tx2);margin-bottom:3px">${i+1}. ${p}</div>`).join('');
+  }
+  const vp=document.getElementById('dash-vision');
+  if(vp){
+    const vis=S.g('v.vis');
+    vp.innerHTML=vis?`<div style="font-size:12px;color:var(--tx2);line-height:1.55;font-style:italic">${vis.substring(0,140)}${vis.length>140?'…':''}</div>`:'<div class="lp-empty">Vision eintragen →</div>';
+  }
+}
+function renderWRGoals(){
+  const el=document.getElementById('wr-goals-ref');if(!el)return;
+  const gs=['g1','g2','g3'].map((g,i)=>({t:S.g('g.'+g+'t'),p:S.g('g.'+g+'p')||0,i:i+1})).filter(x=>x.t);
+  el.innerHTML=gs.length?gs.map(x=>`<div style="margin-bottom:3px"><span class="tag t-d" style="margin-right:5px">0${x.i}</span>${x.t} — ${x.p}%</div>`).join(''):'Noch keine Ziele gesetzt.';
+}
+/* ─ HABITS ─ */
+const HABS={
+  m:[{id:'hs',l:'Screen-freie Morgenroutine',note:'✓',ok:true},{id:'hm',l:'Meditation',note:'✓',ok:true},{id:'hb',l:'Bewegung',note:'✓',ok:true},{id:'he',l:'Bewusstes Frühstück',note:'✓',ok:true},{id:'hmi',l:'MIT festlegen (vor Mails)',ok:false}],
+  mi:[{id:'htd',l:'90-min Tiefe Arbeit Block',ok:false},{id:'hma',l:'Mails gebündelt (1×)',ok:false},{id:'hp',l:'Echte Mittagspause',ok:false}],
+  e:[{id:'hw',l:'3 Wins notiert',ok:false},{id:'hpr',l:'Morgen vorbereitet',ok:false},{id:'hst',l:'Hard Stop ≤ 19:00',note:'⚠',ok:false},{id:'hre',l:'Weekly Review (Mo/So)',ok:false}],
+};
+const DAYS=['Mo','Di','Mi','Do','Fr','Sa','So'];
+function renderHabs(){
+  const data=S.g('hab_w')||{};
+  Object.entries(HABS).forEach(([blk,habs])=>{
+    const cont=document.getElementById('hab-'+blk);if(!cont)return;
+    cont.innerHTML=habs.map(h=>`
+      <div class="hr-row">
+        <div class="hr-name">${h.l}${h.note?`<span style="font-size:9.5px;margin-left:5px;color:${h.ok?'var(--grn)':'var(--rst)'}">${h.note}</span>`:''}</div>
+        <div class="hr-days">${DAYS.map((d,i)=>`<div class="hd ${data[h.id+'_'+i]?'on':''}" onclick="tHab('${h.id}',${i},this)">${d}</div>`).join('')}</div>
+      </div>`).join('');
+  });
+  const all=Object.values(HABS).flat();
+  const tot=all.length*7,done=Object.values(data).filter(Boolean).length;
+  const s=document.getElementById('hab-stats');
+  if(s)s.textContent=`${done}/${tot} Habits (${tot?Math.round(done/tot*100):0}%) — Streak: ${calcStreak()} Tage 🔥`;
+}
+function tHab(id,day,el){
+  const data=S.g('hab_w')||{};const k=id+'_'+day;data[k]=!data[k];S.s('hab_w',data);el.classList.toggle('on');updateStreak();
+}
+/* ─ STREAK ─ */
+function calcStreak(){
+  const a=S.g('arch_d')||[];if(!a.length)return 0;
+  const dates=a.map(x=>x.date).sort().reverse();let s=0,c=iso();
+  for(const d of dates){if(d===c){s++;const p=new Date(c+'T12:00:00');p.setDate(p.getDate()-1);c=p.toISOString().split('T')[0]}else break}
+  return s;
+}
+function updateStreak(){const s=calcStreak();const v=document.getElementById('sb-streak');if(v)v.textContent=s+'🔥'}
+/* ─ AUTO ARCHIVE ─ */
+function checkAutoArchive(){
+  const last=S.g('last_date'),today=iso();
+  if(!last){S.s('last_date',today);return}
+  if(last!==today){
+    archDay(last);
+    if(kw(last)!==kw(today))archWeek(kw(last),last);
+    const tmit=S.g('d.tmit');if(tmit){S.s('d.mit',tmit);S.d('d.tmit')}
+    ['d.w1','d.w2','d.w3','d.learn','d.grat','d.t1','d.t1a','d.t2','d.t3','d.ttask','r.e-en','r.e-fo','r.e-mo'].forEach(k=>S.d(k));
+    S.s('last_date',today);
+    toast('☀️ Neuer Tag — gestern automatisch archiviert.',3800);
+  }
+}
+function archDay(dateISO){
+  const e={date:dateISO,mit:S.g('d.mit'),tasks:[S.g('d.t1'),S.g('d.t2'),S.g('d.t3')].filter(Boolean),wins:[S.g('d.w1'),S.g('d.w2'),S.g('d.w3')].filter(Boolean),learn:S.g('d.learn'),grat:S.g('d.grat'),energy:S.g('r.e-en'),focus:S.g('r.e-fo'),mood:S.g('r.e-mo'),note:S.g('d.qnote')};
+  if(!e.mit&&!e.tasks.length&&!e.wins.length)return;
+  const a=S.g('arch_d')||[];const i=a.findIndex(x=>x.date===dateISO);
+  if(i>=0)a[i]=e;else a.unshift(e);S.s('arch_d',a);
+}
+function archWeek(kwNum,dateISO){
+  const e={kw:kwNum,year:new Date(dateISO+'T12:00:00').getFullYear(),date:dateISO,ach:S.g('wr.ach'),co:S.g('wr.co'),ga:S.g('wr.ga'),insight:S.g('wr.in'),thanks:S.g('wr.th'),proud:S.g('wr.pr'),ph:S.g('r.wr-ph'),me:S.g('r.wr-me'),em:S.g('r.wr-em'),g1:S.g('wr.g1'),g2:S.g('wr.g2'),g3:S.g('wr.g3'),p1:S.g('pr.p1'),p2:S.g('pr.p2'),p3:S.g('pr.p3')};
+  if(!e.ach&&!e.insight)return;
+  const a=S.g('arch_w')||[];const i=a.findIndex(x=>x.kw===kwNum&&x.year===e.year);
+  if(i>=0)a[i]=e;else a.unshift(e);S.s('arch_w',a);
+  ['wr.ach','wr.co','wr.ga','wr.in','wr.th','wr.pr','wr.g1','wr.g2','wr.g3','pr.p1','pr.p2','pr.p3','pr.p1g','pr.p2g','pr.p3g','pr.wmit','r.wr-ph','r.wr-me','r.wr-em'].forEach(k=>S.d(k));
+  localStorage.removeItem(`vb_${uid()}_hab_w`);
+}
+function archiveWeekNow(){persist();archWeek(kw(iso()),iso());toast('📅 Weekly Review archiviert!')}
+/* ─ DECISIONS ─ */
+function addDec(){
+  const t=gv('d-ttl');if(!t.trim()){toast('⚠ Titel eingeben');return}
+  const days=parseInt(gv('d-rev')||'30');const rv=new Date();rv.setDate(rv.getDate()+days);
+  const list=S.g('decs')||[];
+  list.unshift({id:Date.now(),date:iso(),title:t,opts:gv('d-opt'),exp:gv('d-exp'),rv:rv.toISOString().split('T')[0],done:false});
+  S.s('decs',list);sv('d-ttl','');sv('d-opt','');sv('d-exp','');renderDecs();toast('✓ Gespeichert');
+}
+function doneDec(id){const l=S.g('decs')||[];const d=l.find(x=>x.id===id);if(d){d.done=true;S.s('decs',l);renderDecs();toast('✓ Abgeschlossen')}}
+function renderDecs(){
+  const l=S.g('decs')||[];const c=document.getElementById('dec-list');if(!c)return;
+  if(!l.length){c.innerHTML='<div style="color:var(--tx4);font-size:12px">Noch keine Einträge...</div>';return}
+  c.innerHTML=l.map(d=>`
+    <div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;box-shadow:var(--sh)">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--b9);margin-bottom:3px">${d.title}</div>
+        <div style="font-size:9.5px;color:var(--tx4);font-family:'JetBrains Mono',monospace;margin-bottom:5px">${fmt(d.date)} → Review: ${fmt(d.rv)}</div>
+        ${d.opts?`<div style="font-size:11.5px;color:var(--tx3);margin-bottom:2px">${d.opts}</div>`:''}
+        ${d.exp?`<div style="font-size:11.5px;color:var(--tx3)">Erwartet: ${d.exp}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0">
+        <span class="tag ${d.done?'t-gr':'t-g'}">${d.done?'Fertig':'Offen'}</span>
+        ${!d.done?`<button class="btn btn-s" style="font-size:9.5px;padding:3px 9px" onclick="doneDec(${d.id})">Abschließen</button>`:''}
+      </div>
+    </div>`).join('');
+}
+/* ─ ARCHIVE ─ */
+function renderDayArch(){
+  const a=S.g('arch_d')||[];const c=document.getElementById('arch-days-content');if(!c)return;
+  if(!a.length){c.innerHTML='<div style="background:var(--acc-lt);border:1px solid var(--acc-bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--acc)">Noch keine archivierten Tage. Das OS archiviert automatisch bei Tageswechsel.</div>';return}
+  c.innerHTML='<div class="tl">'+a.map(d=>`
+    <div class="tl-it"><div class="tl-dot"></div>
+    <div class="tl-date">${fmt(d.date)}</div>
+    <div class="tl-card" onclick='vDay(${JSON.stringify(JSON.stringify(d))})'>
+      <div style="font-size:12.5px;font-weight:500;color:var(--b9);margin-bottom:5px">${d.mit||'(kein MIT)'}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">
+        ${d.energy?`<span class="tag t-m">Energie: ${d.energy}/5</span>`:''}
+        ${d.focus?`<span class="tag t-d">Fokus: ${d.focus}/5</span>`:''}
+        ${d.mood?`<span class="tag t-d">${['😔','😐','🙂','😊','🔥'][d.mood-1]||''}</span>`:''}
+      </div>
+      ${d.tasks?.length?`<div style="font-size:11px;color:var(--tx3)">${d.tasks.map(t=>'• '+t).join('  ')}</div>`:''}`
+    +'</div></div>').join('')+'</div>';
+}
+function vDay(js){
+  const d=JSON.parse(js);
+  document.getElementById('m-day-body').innerHTML=`
+    <div class="mt">${fmt(d.date)}</div><div class="ms">Archivierter Tag</div>
+    ${d.mit?`<div style="margin-bottom:12px"><div class="il">MIT</div><div style="font-size:13.5px;font-weight:500;color:var(--b9)">${d.mit}</div></div>`:''}
+    ${d.tasks?.length?`<div style="margin-bottom:12px"><div class="il">Aufgaben</div>${d.tasks.map(t=>`<div style="font-size:12px;color:var(--tx2);margin-bottom:2px">• ${t}</div>`).join('')}</div>`:''}
+    ${d.wins?.length?`<div style="margin-bottom:12px"><div class="il">Wins</div>${d.wins.map((w,i)=>`<div style="font-size:12px;color:var(--tx2);margin-bottom:2px">${i+1}. ${w}</div>`).join('')}</div>`:''}
+    ${d.learn?`<div style="margin-bottom:12px"><div class="il">Lernpunkt</div><div style="font-size:12px;color:var(--tx2)">${d.learn}</div></div>`:''}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${d.energy?`<span class="tag t-m">Energie ${d.energy}/5</span>`:''} ${d.focus?`<span class="tag t-d">Fokus ${d.focus}/5</span>`:''}</div>`;
+  oM('m-day');
+}
+function renderWeekArch(){
+  const a=S.g('arch_w')||[];const c=document.getElementById('arch-weeks-content');if(!c)return;
+  const gs={on:'Auf Kurs ✓',slight:'Leicht hinter Plan',behind:'Hinter Plan',change:'Anpassen','':'—'};
+  if(!a.length){c.innerHTML='<div style="background:var(--acc-lt);border:1px solid var(--acc-bd);border-radius:var(--r);padding:10px 13px;font-size:12px;color:var(--acc)">Noch keine archivierten Wochen.</div>';return}
+  c.innerHTML=a.map(w=>`
+    <div style="background:var(--surf);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px;cursor:pointer;box-shadow:var(--sh)" onclick='vWeek(${JSON.stringify(JSON.stringify(w))})'>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--b9);font-weight:600">KW ${w.kw} · ${w.year}</div>
+        <div style="display:flex;gap:4px">${w.ph?`<span class="tag t-d">K:${w.ph}</span>`:''} ${w.me?`<span class="tag t-d">M:${w.me}</span>`:''}</div>
+      </div>
+      <div style="font-size:11px;color:var(--tx4);font-family:'JetBrains Mono',monospace;margin-bottom:6px">${fmt(w.date)}</div>
+      ${w.ach?`<div style="font-size:12px;color:var(--tx2);margin-bottom:6px">${w.ach.substring(0,120)}${w.ach.length>120?'…':''}</div>`:''}
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${w.g1?`<span class="tag t-r">Z1: ${gs[w.g1||'']}</span>`:''} ${w.g2?`<span class="tag t-m">Z2: ${gs[w.g2||'']}</span>`:''} ${w.g3?`<span class="tag t-gr">Z3: ${gs[w.g3||'']}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+function vWeek(js){
+  const w=JSON.parse(js);const gs={on:'Auf Kurs ✓',slight:'Leicht hinter Plan',behind:'Hinter Plan',change:'Anpassen','':'—'};
+  document.getElementById('m-week-body').innerHTML=`
+    <div class="mt">KW ${w.kw} · ${w.year}</div><div class="ms">${fmt(w.date)}</div>
+    ${w.ach?`<div style="margin-bottom:12px"><div class="il">Erreicht</div><div style="font-size:12px;color:var(--tx2)">${w.ach}</div></div>`:''}
+    ${w.insight?`<div style="margin-bottom:12px"><div class="il">Wichtigste Erkenntnis</div><div style="font-size:13px;color:var(--acc);font-style:italic;font-family:'Cormorant Garamond',serif">"${w.insight}"</div></div>`:''}
+    ${w.proud?`<div style="margin-bottom:12px"><div class="il">Worauf ich stolz war</div><div style="font-size:12px;color:var(--tx2)">${w.proud}</div></div>`:''}
+    <div style="display:flex;gap:14px;margin:12px 0"><div><div class="il">Körperlich</div><div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--acc);font-weight:600">${w.ph||'—'}/5</div></div><div><div class="il">Mental</div><div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--acc);font-weight:600">${w.me||'—'}/5</div></div><div><div class="il">Emotional</div><div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--acc);font-weight:600">${w.em||'—'}/5</div></div></div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">${w.g1?`<span class="tag t-r">Z1: ${gs[w.g1||'']}</span>`:''} ${w.g2?`<span class="tag t-m">Z2: ${gs[w.g2||'']}</span>`:''} ${w.g3?`<span class="tag t-gr">Z3: ${gs[w.g3||'']}</span>`:''}</div>
+    ${w.p1||w.p2||w.p3?`<div><div class="il">Nächste Woche</div><div style="font-size:12px;color:var(--tx2)">${[w.p1,w.p2,w.p3].filter(Boolean).map((p,i)=>`${i+1}. ${p}`).join('<br>')}</div></div>`:''}`;
+  oM('m-week');
+}
+/* ─ MODAL ─ */
+function oM(id){document.getElementById(id).classList.add('on')}
+function cM(id){document.getElementById(id).classList.remove('on')}
+document.querySelectorAll('.mbg').forEach(bg=>bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('on')}));
+/* ─ UI ─ */
+function updateUI(){
+  const now=new Date();
+  const ds=now.toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'});
+  const de=document.getElementById('sb-date');if(de)de.textContent=ds;
+  const he=document.getElementById('hero-date');if(he)he.textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · KW '+kw(iso());
+}
+/* ─ INIT ─ */
+async function init(){
+  sbInit();
+  updateUI();
+  // Hide app until logged in
+  if(_sb){
+    document.querySelector('.sb').style.display='none';
+    document.querySelector('.main').style.display='none';
+    await checkSession();
+  } else {
+    // No config — run locally
+    showApp();
+    setSyncSt('no-config');
+    bootApp();
+  }
+}
+
+function bootApp(){
+  checkAutoArchive();updateStreak();
+  loadF([['mit','d.mit'],['t1','d.t1'],['t1a','d.t1a'],['t2','d.t2'],['t3','d.t3']]);
+  lR([['e-en','r.e-en'],['e-fo','r.e-fo'],['e-mo','r.e-mo']]);
+  refreshDash();
+  document.querySelectorAll('.ck.on').forEach(el=>el.innerHTML='<span style="color:#fff;font-size:8px;font-weight:700">✓</span>');
+  if(_sb && _user) {
+    syncDown();
+    setInterval(()=>syncDown(),30000);
+  }
+  setInterval(()=>{const l=S.g('last_date');if(l&&l!==iso()){checkAutoArchive();updateUI()}},60000);
+}
+
+init();
+</script>
+</body>
+</html>
