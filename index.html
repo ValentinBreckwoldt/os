@@ -912,8 +912,8 @@ tbody tr:hover td{background:var(--surf2)}
 /* ════════════════════════════════════════
    ★ SUPABASE CONFIG — hier deine Keys eintragen
 ════════════════════════════════════════ */
-const SUPABASE_URL  = 'DEINE_SUPABASE_URL_HIER';   // z.B. https://abcxyz.supabase.co
-const SUPABASE_KEY  = 'DEIN_ANON_PUBLIC_KEY_HIER';  // langer String aus Project Settings → API
+const SUPABASE_URL  = 'https://amlorumedifvtitxmyed.supabase.co';   // z.B. https://abcxyz.supabase.co
+const SUPABASE_KEY  = 'sb_publishable_7CCHTV9CER_PkC2_mcRZdw_4qaOAJQJ';  // langer String aus Project Settings → API
 const USER_ID       = 'valentin';                   // dein fester Identifier — nicht ändern
 /* ══════════════════════════════════════ */
 
@@ -922,7 +922,7 @@ let _syncTimer = null;
 let _lastSyncedData = null;
 
 function initSupabase() {
-  if (SUPABASE_URL === 'DEINE_SUPABASE_URL_HIER') return; // noch nicht konfiguriert
+  if (SUPABASE_URL === 'https://amlorumedifvtitxmyed.supabase.co') return; // noch nicht konfiguriert
   try {
     _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     console.log('Supabase verbunden');
